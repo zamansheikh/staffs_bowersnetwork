@@ -22,6 +22,8 @@ export interface User {
         is_pro: boolean;
         is_center_admin: boolean;
         is_tournament_director: boolean;
+        is_office_admin?: boolean;
+        is_office_staff?: boolean;
     };
     contact_info?: {
         email: string;

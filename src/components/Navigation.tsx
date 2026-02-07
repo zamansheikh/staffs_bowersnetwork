@@ -11,10 +11,9 @@ import {
     X,
     LayoutDashboard,
     Users,
-    Mail,
     Tag,
-    Layers,
-    ChevronRight
+    ChevronRight,
+    Shield
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -24,10 +23,8 @@ interface NavigationProps {
 
 const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/staff', label: 'Staff', icon: Users },
-    { href: '/emails', label: 'Emails', icon: Mail },
+    { href: '/team', label: 'Team', icon: Users },
     { href: '/brands', label: 'Brands', icon: Tag },
-    { href: '/brand-types', label: 'Brand Types', icon: Layers },
 ];
 
 export default function Navigation({ children }: NavigationProps) {
@@ -41,6 +38,8 @@ export default function Navigation({ children }: NavigationProps) {
     if (hideNav) {
         return <>{children}</>;
     }
+
+    const isAdmin = user?.roles?.is_office_admin === true;
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -107,7 +106,7 @@ export default function Navigation({ children }: NavigationProps) {
                     {/* Navigation Links */}
                     <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
                         {navItems.map((item) => {
-                            const isActive = pathname === item.href;
+                            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
                             const Icon = item.icon;
                             return (
                                 <Link
@@ -148,8 +147,14 @@ export default function Navigation({ children }: NavigationProps) {
                                     </div>
                                 )}
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-black truncate">
+                                    <p className="text-sm font-medium text-black truncate flex items-center gap-2">
                                         {user.name || user.username}
+                                        {isAdmin && (
+                                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-purple-100 text-purple-700 text-xs font-medium rounded">
+                                                <Shield className="w-3 h-3" />
+                                                Admin
+                                            </span>
+                                        )}
                                     </p>
                                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
                                 </div>

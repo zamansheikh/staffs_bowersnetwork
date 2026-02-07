@@ -4,15 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { PageLoader } from '@/components/LoadingSpinner';
-import { Users, Mail, Tag, Layers, TrendingUp, ArrowRight } from 'lucide-react';
+import { Users, Tag, TrendingUp, ArrowRight, Shield } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 
 interface DashboardStats {
     staffCount: number;
-    emailsCount: number;
     brandsCount: number;
-    brandTypesCount: number;
 }
 
 export default function Dashboard() {
@@ -20,11 +18,11 @@ export default function Dashboard() {
     const router = useRouter();
     const [stats, setStats] = useState<DashboardStats>({
         staffCount: 0,
-        emailsCount: 0,
         brandsCount: 0,
-        brandTypesCount: 0,
     });
     const [loadingStats, setLoadingStats] = useState(true);
+
+    const isAdmin = user?.roles?.is_office_admin === true;
 
     useEffect(() => {
         if (!isLoading && !user?.authenticated) {
@@ -43,18 +41,14 @@ export default function Dashboard() {
             const token = localStorage.getItem('access_token');
             const headers = { Authorization: `Bearer ${token}` };
 
-            const [staffRes, emailsRes, brandsRes, brandTypesRes] = await Promise.allSettled([
+            const [staffRes, brandsRes] = await Promise.allSettled([
                 axios.get('/api/office/staff', { headers }),
-                axios.get('/api/office/emails', { headers }),
                 axios.get('/api/office/brands', { headers }),
-                axios.get('/api/office/brand-types', { headers }),
             ]);
 
             setStats({
                 staffCount: staffRes.status === 'fulfilled' ? (staffRes.value.data?.length || 0) : 0,
-                emailsCount: emailsRes.status === 'fulfilled' ? (emailsRes.value.data?.length || 0) : 0,
                 brandsCount: brandsRes.status === 'fulfilled' ? (brandsRes.value.data?.length || 0) : 0,
-                brandTypesCount: brandTypesRes.status === 'fulfilled' ? (brandTypesRes.value.data?.length || 0) : 0,
             });
         } catch (error) {
             console.error('Error fetching stats:', error);
@@ -73,20 +67,12 @@ export default function Dashboard() {
 
     const statCards = [
         {
-            title: 'Staff Members',
+            title: 'Team Members',
             count: stats.staffCount,
             icon: Users,
-            href: '/staff',
+            href: '/team',
             color: 'bg-blue-500',
             bgColor: 'bg-blue-50',
-        },
-        {
-            title: 'User Emails',
-            count: stats.emailsCount,
-            icon: Mail,
-            href: '/emails',
-            color: 'bg-green-500',
-            bgColor: 'bg-green-50',
         },
         {
             title: 'Brands',
@@ -96,30 +82,30 @@ export default function Dashboard() {
             color: 'bg-purple-500',
             bgColor: 'bg-purple-50',
         },
-        {
-            title: 'Brand Types',
-            count: stats.brandTypesCount,
-            icon: Layers,
-            href: '/brand-types',
-            color: 'bg-orange-500',
-            bgColor: 'bg-orange-50',
-        },
     ];
 
     return (
         <div className="p-4 sm:p-6 lg:p-8">
             {/* Header */}
             <div className="mb-8">
-                <h1 className="text-2xl sm:text-3xl font-bold text-black">
-                    Welcome back, {user.first_name || user.name?.split(' ')[0] || 'Admin'}! 👋
-                </h1>
+                <div className="flex items-center gap-3 flex-wrap">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-black">
+                        Welcome back, {user.first_name || user.name?.split(' ')[0] || 'Team'}! 👋
+                    </h1>
+                    {isAdmin && (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-lg">
+                            <Shield className="w-3 h-3" />
+                            Office Admin
+                        </span>
+                    )}
+                </div>
                 <p className="text-gray-600 mt-1">
-                    Here&apos;s what&apos;s happening with your office today.
+                    Manage your team and brands from here.
                 </p>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
                 {statCards.map((card) => {
                     const Icon = card.icon;
                     return (
@@ -139,9 +125,7 @@ export default function Dashboard() {
                                     {loadingStats ? (
                                         <span className="inline-block w-12 h-8 bg-gray-200 rounded animate-pulse" />
                                     ) : (
-                                        stats[card.title === 'Staff Members' ? 'staffCount' :
-                                            card.title === 'User Emails' ? 'emailsCount' :
-                                                card.title === 'Brands' ? 'brandsCount' : 'brandTypesCount']
+                                        card.title === 'Team Members' ? stats.staffCount : stats.brandsCount
                                     )}
                                 </p>
                                 <p className="text-sm text-gray-600 mt-1">{card.title}</p>
@@ -157,20 +141,13 @@ export default function Dashboard() {
                     <TrendingUp className="w-5 h-5 text-[#22C55E]" />
                     <h2 className="text-lg font-bold text-black">Quick Actions</h2>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <Link
-                        href="/staff"
+                        href="/team"
                         className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
                     >
                         <Users className="w-5 h-5 text-gray-600" />
-                        <span className="text-sm font-medium text-black">Manage Staff</span>
-                    </Link>
-                    <Link
-                        href="/emails"
-                        className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
-                    >
-                        <Mail className="w-5 h-5 text-gray-600" />
-                        <span className="text-sm font-medium text-black">View Emails</span>
+                        <span className="text-sm font-medium text-black">Manage Team</span>
                     </Link>
                     <Link
                         href="/brands"
@@ -178,13 +155,6 @@ export default function Dashboard() {
                     >
                         <Tag className="w-5 h-5 text-gray-600" />
                         <span className="text-sm font-medium text-black">Manage Brands</span>
-                    </Link>
-                    <Link
-                        href="/brand-types"
-                        className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
-                    >
-                        <Layers className="w-5 h-5 text-gray-600" />
-                        <span className="text-sm font-medium text-black">Brand Types</span>
                     </Link>
                 </div>
             </div>
@@ -202,8 +172,17 @@ export default function Dashboard() {
                         <p className="text-sm font-semibold text-black">{user.username || 'N/A'}</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-xl">
-                        <p className="text-xs text-gray-500 uppercase font-medium mb-1">Email</p>
-                        <p className="text-sm font-semibold text-black truncate">{user.email || 'N/A'}</p>
+                        <p className="text-xs text-gray-500 uppercase font-medium mb-1">Role</p>
+                        <p className="text-sm font-semibold text-black flex items-center gap-2">
+                            {isAdmin ? (
+                                <>
+                                    <Shield className="w-4 h-4 text-purple-600" />
+                                    Office Admin
+                                </>
+                            ) : (
+                                'Office Staff'
+                            )}
+                        </p>
                     </div>
                 </div>
             </div>
