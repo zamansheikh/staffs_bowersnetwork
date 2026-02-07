@@ -1,0 +1,30 @@
+{
+    "name": "staffs-bowersnetwork",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev --turbopack -p 5452",
+        "build": "next build",
+        "start": "next start -p 3000",
+        "lint": "next lint",
+        "type-check": "tsc --noEmit"
+    },
+    "dependencies": {
+        "axios": "^1.13.2",
+        "lucide-react": "^0.560.0",
+        "next": "^16.0.8",
+        "react": "^19.2.1",
+        "react-dom": "^19.2.1"
+    },
+    "devDependencies": {
+        "@eslint/eslintrc": "^3.3.3",
+        "@tailwindcss/postcss": "^4.1.17",
+        "@types/node": "^25.0.0",
+        "@types/react": "^19.2.7",
+        "@types/react-dom": "^19.2.3",
+        "eslint": "^9.39.1",
+        "eslint-config-next": "16.0.8",
+        "tailwindcss": "^4.1.17",
+        "typescript": "^5.9.3"
+    }
+}
