@@ -85,11 +85,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
             const token = incomingToken || localStorage.getItem('access_token');
             if (!token) {
                 localStorage.removeItem('user');
+                document.cookie = 'access_token=; path=/; max-age=0'; // Clear cookie
                 setUser(null);
                 return false;
             }
 
             localStorage.setItem('access_token', token);
+            // Set cookie so middleware can read it
+            document.cookie = `access_token=${token}; path=/; max-age=${30 * 24 * 60 * 60}`; // 30 days
 
             try {
                 const profileResponse = await axios.get('https://test.bowlersnetwork.com/api/profile/data', {
@@ -212,6 +215,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const signout = () => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('user');
+        document.cookie = 'access_token=; path=/; max-age=0'; // Clear cookie
         setUser(null);
         router.push('/signin');
     };
