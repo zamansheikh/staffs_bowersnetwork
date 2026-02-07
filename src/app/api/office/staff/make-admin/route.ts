@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const API_BASE = 'https://test.bowlersnetwork.com';
+const API_BASE = 'https://test.bowlersnetwork.com/api';
 
 // POST - Promote staff to admin
 export async function POST(request: NextRequest) {

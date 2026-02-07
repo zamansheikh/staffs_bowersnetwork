@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const API_BASE = 'https://test.bowlersnetwork.com';
+const API_BASE = 'https://test.bowlersnetwork.com/api';
 
 // POST - Edit brand
 export async function POST(
