@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
                 hostname: 'test.bowlersnetwork.com',
                 pathname: '/**',
             },
+            {
+                protocol: 'https',
+                hostname: 'cdn.bowlersnetwork.com',
+                pathname: '/**',
+            },
         ],
     },
 };
