@@ -20,10 +20,7 @@ export function middleware(request: NextRequest) {
 
     // If it's a protected route and user is not authenticated, redirect to signin
     if (!isPublicRoute && !token) {
-        const isDirectAccess = !request.headers.get('referer');
-        if (isDirectAccess) {
-            return NextResponse.redirect(new URL('/signin', request.url));
-        }
+        return NextResponse.redirect(new URL('/signin', request.url));
     }
 
     return NextResponse.next();
@@ -31,6 +28,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
-        '/((?!api|_next/static|_next/image|favicon.ico).*)',
+        '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)',
     ],
 };
