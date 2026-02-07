@@ -1,0 +1,38 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no root@31.97.135.175 "
+            export PATH=\$PATH:/root/.bun/bin &&
+            export PATH=/root/.nvm/versions/node/v20.19.5/bin:\$PATH &&
+            cd /var/www/staffs_bowersnetwork &&
+            git stash &&
+            GIT_SSH_COMMAND=\"ssh -i ~/.ssh/id_ed25519_deploy\" git pull origin main &&
+            bun install &&
+            bun run build &&
+            if tmux has-session -t staffs_bowersnetwork 2>/dev/null; then
+              echo \"Already session running: staffs_bowersnetwork. Killing it...\"
+              tmux kill-session -t staffs_bowersnetwork
+            fi &&
+            echo \"Starting new session: staffs_bowersnetwork\" &&
+            tmux new-session -d -s staffs_bowersnetwork 'bun run start' &&
+            echo \"Successfully started 'bun run start' in tmux session staffs_bowersnetwork\"
+          "
+ # GIT_SSH_COMMAND="ssh -i ~/.ssh/id_ed25519_deploy" git clone git@github.com:zamansheikh/staffs_bowersnetwork.git .
