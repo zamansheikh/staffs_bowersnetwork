@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "Staffs Portal - BowlersNetwork",
-    description: "Staff management portal for BowlersNetwork operations",
+    title: "Office Portal - BowlersNetwork",
+    description: "Office management portal for BowlersNetwork operations",
 };
 
 export default function RootLayout({

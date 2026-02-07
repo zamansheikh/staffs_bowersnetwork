@@ -33,7 +33,9 @@ export default function SignIn() {
         try {
             const result = await signin(username, password);
             if (result.success) {
-                router.push('/dashboard');
+                // Force navigation to dashboard
+                router.replace('/dashboard');
+                router.refresh();
             } else {
                 setError(result.error || 'Invalid credentials. Please try again.');
             }
@@ -58,7 +60,7 @@ export default function SignIn() {
                         <div className="relative h-12 w-48 rounded-lg overflow-hidden shadow-md">
                             <Image
                                 src="https://logos.bowlersnetwork.com/office_logo.png"
-                                alt="The Office - Staff Portal"
+                                alt="The Office Portal"
                                 fill
                                 className="object-contain"
                                 unoptimized
@@ -68,13 +70,13 @@ export default function SignIn() {
 
                     <div className="mb-10 animate-in">
                         <div className="inline-block px-4 py-2 bg-gray-100 rounded-full mb-4">
-                            <span className="text-sm font-bold text-black">👋 Staff Portal</span>
+                            <span className="text-sm font-bold text-black">👋 Office Portal</span>
                         </div>
                         <h1 className="text-5xl font-extrabold text-black tracking-tight mb-3">
                             Welcome back
                         </h1>
                         <p className="text-gray-600 text-lg leading-relaxed">
-                            Sign in to access the staff management portal.
+                            Sign in to access the office management portal.
                         </p>
                     </div>
 
@@ -221,7 +223,7 @@ export default function SignIn() {
                         <div className="relative h-16 w-64 rounded-lg overflow-hidden">
                             <Image
                                 src="https://logos.bowlersnetwork.com/office_logo.png"
-                                alt="The Office - Staff Portal"
+                                alt="The Office Portal"
                                 fill
                                 className="object-contain"
                                 unoptimized
@@ -236,7 +238,7 @@ export default function SignIn() {
                         </blockquote>
 
                         <p className="text-xl text-white/80 leading-relaxed max-w-md font-medium">
-                            Access staff tools, manage events, and oversee bowling center operations.
+                            Access office tools, manage events, and oversee bowling center operations.
                         </p>
 
                         {/* Feature Pills */}
