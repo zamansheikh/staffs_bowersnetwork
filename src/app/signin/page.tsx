@@ -55,12 +55,12 @@ export default function SignIn() {
                 <div className="max-w-md w-full mx-auto">
                     {/* Mobile Logo */}
                     <div className="lg:hidden mb-8 animate-in flex justify-center">
-                        <div className="w-16 h-16 relative bg-white rounded-2xl p-2 shadow-md border border-gray-200">
+                        <div className="relative h-12 w-48 rounded-lg overflow-hidden shadow-md">
                             <Image
                                 src="https://logos.bowlersnetwork.com/office_logo.png"
-                                alt="BowlersNetwork Staff"
+                                alt="The Office - Staff Portal"
                                 fill
-                                className="object-contain p-1"
+                                className="object-contain"
                                 unoptimized
                             />
                         </div>
@@ -216,14 +216,14 @@ export default function SignIn() {
                 </div>
 
                 <div className="relative z-10 h-full flex flex-col justify-between p-12 text-white w-full">
-                    {/* Logo - Centered */}
+                    {/* Logo - Full Width Banner */}
                     <div className="flex justify-center animate-in">
-                        <div className="w-20 h-20 relative bg-white/10 backdrop-blur-md rounded-3xl p-4 shadow-2xl border border-white/20">
+                        <div className="relative h-16 w-64 rounded-lg overflow-hidden">
                             <Image
                                 src="https://logos.bowlersnetwork.com/office_logo.png"
-                                alt="BowlersNetwork Staff"
+                                alt="The Office - Staff Portal"
                                 fill
-                                className="object-contain p-2"
+                                className="object-contain"
                                 unoptimized
                             />
                         </div>

@@ -31,18 +31,15 @@ export default function Navigation({ children }: NavigationProps) {
                     <div className="flex justify-between items-center h-16">
                         {/* Logo */}
                         <Link href="/dashboard" className="flex items-center gap-3">
-                            <div className="relative w-10 h-10">
+                            <div className="relative h-10 w-32">
                                 <Image
                                     src="https://logos.bowlersnetwork.com/office_logo.png"
-                                    alt="BowlersNetwork Staff"
+                                    alt="The Office - Staff Portal"
                                     fill
                                     className="object-contain"
                                     unoptimized
                                 />
                             </div>
-                            <span className="text-lg font-bold text-black hidden sm:block">
-                                Staff Portal
-                            </span>
                         </Link>
 
                         {/* Desktop Menu */}
@@ -52,8 +49,8 @@ export default function Navigation({ children }: NavigationProps) {
                                     <Link
                                         href="/dashboard"
                                         className={`text-sm font-medium transition-colors ${pathname === '/dashboard'
-                                                ? 'text-[#22C55E]'
-                                                : 'text-black hover:text-[#22C55E]'
+                                            ? 'text-[#22C55E]'
+                                            : 'text-black hover:text-[#22C55E]'
                                             }`}
                                     >
                                         Dashboard
