@@ -222,8 +222,8 @@ export default function BrandsPage() {
                             className="px-4 py-3 bg-white border border-gray-200 rounded-xl text-black focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all"
                         >
                             <option value="">All Types</option>
-                            {brandTypes.map((type) => (
-                                <option key={type.id} value={type.id}>{type.name}</option>
+                            {(Array.isArray(brandTypes) ? brandTypes : []).map((type, index) => (
+                                <option key={type.id || type.name || index} value={type.id ?? ''}>{type.name}</option>
                             ))}
                         </select>
                     </div>
@@ -243,9 +243,9 @@ export default function BrandsPage() {
                         />
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                            {filteredBrands.map((brand) => (
+                            {filteredBrands.map((brand, index) => (
                                 <div
-                                    key={brand.id}
+                                    key={brand.id || brand.name || index}
                                     className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-lg hover:border-gray-300 transition-all group"
                                 >
                                     <div className="relative w-full h-24 mb-4 bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center">
@@ -314,9 +314,9 @@ export default function BrandsPage() {
                         />
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                            {brandTypes.map((type) => (
+                            {(Array.isArray(brandTypes) ? brandTypes : []).map((type, index) => (
                                 <div
-                                    key={type.id}
+                                    key={type.id || type.name || index}
                                     className="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg hover:border-gray-300 transition-all"
                                 >
                                     <div className="flex items-start gap-4">
@@ -356,8 +356,8 @@ export default function BrandsPage() {
                             required
                         >
                             <option value="">Select type...</option>
-                            {brandTypes.map((type) => (
-                                <option key={type.id} value={type.id}>{type.name}</option>
+                            {(Array.isArray(brandTypes) ? brandTypes : []).map((type, index) => (
+                                <option key={type.id || type.name || index} value={type.id ?? ''}>{type.name}</option>
                             ))}
                         </select>
                     </div>
