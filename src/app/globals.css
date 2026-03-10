@@ -1,20 +1,30 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
   --brand-green: #22C55E;
+  --surface: #f9fafb;
+  --surface-2: #f3f4f6;
+  --border-color: #e5e7eb;
+  --muted: #6b7280;
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --surface: #1e293b;
+  --surface-2: #334155;
+  --border-color: #334155;
+  --muted: #94a3b8;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
-}
-
-/* Force light theme */
-* {
-  color-scheme: light;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Links styling - green for clickables */
