@@ -54,7 +54,7 @@ export default function Navigation({ children }: NavigationProps) {
                                 src="https://logos.bowlersnetwork.com/office_logo.png"
                                 alt="The Office"
                                 fill
-                                className="object-contain dark:invert"
+                                className="object-contain invert dark:invert-0"
                                 unoptimized
                             />
                         </div>
@@ -101,7 +101,7 @@ export default function Navigation({ children }: NavigationProps) {
                                     src="https://logos.bowlersnetwork.com/office_logo.png"
                                     alt="The Office"
                                     fill
-                                    className="object-contain dark:invert"
+                                    className="object-contain invert dark:invert-0"
                                     unoptimized
                                 />
                             </div>
