@@ -11,6 +11,7 @@ import { Tag, Plus, Edit2, Search, X, ExternalLink, Layers } from 'lucide-react'
 import axios from 'axios';
 import Image from 'next/image';
 import { Brand, BrandType } from '@/types/office';
+import { uploadFileToCloud } from '@/lib/cloudUploadService';
 
 type TabType = 'brands' | 'types';
 
@@ -31,6 +32,9 @@ export default function BrandsPage() {
     const [formName, setFormName] = useState('');
     const [formFormalName, setFormFormalName] = useState('');
     const [formLogoUrl, setFormLogoUrl] = useState('');
+    const [logoFile, setLogoFile] = useState<File | null>(null);
+    const [uploadingLogo, setUploadingLogo] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
     const [formBrandTypeId, setFormBrandTypeId] = useState<number | ''>('');
 
     const { toast, showToast, hideToast } = useToast();
@@ -113,7 +117,7 @@ export default function BrandsPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formName || !formFormalName || !formLogoUrl || !formBrandTypeId) {
+        if (!formName || !formFormalName || (!formLogoUrl && !logoFile) || !formBrandTypeId) {
             showToast('Please fill in all fields', 'warning');
             return;
         }
@@ -121,6 +125,22 @@ export default function BrandsPage() {
         setSubmitting(true);
         try {
             const token = localStorage.getItem('access_token');
+            // if there is a file selected, upload first
+            if (logoFile) {
+                setUploadingLogo(true);
+                setUploadProgress(0);
+                const result = await uploadFileToCloud(logoFile, 'cdn', {
+                    onProgress: (p) => setUploadProgress(p),
+                    onError: (err) => showToast(`Upload error: ${err}`, 'error'),
+                });
+                setUploadingLogo(false);
+                if (result.success && result.publicUrl) {
+                    setFormLogoUrl(result.publicUrl);
+                } else {
+                    throw new Error('Logo upload failed');
+                }
+            }
+
             const payload = {
                 brand_type_id: formBrandTypeId,
                 brand_data: {
@@ -166,6 +186,16 @@ export default function BrandsPage() {
     if (authLoading) {
         return <PageLoader text="Loading..." />;
     }
+
+    // upload helper
+    // changed: just store file, upload on submit
+    const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setLogoFile(file);
+            setFormLogoUrl(URL.createObjectURL(file));
+        }
+    };
 
     if (!user?.authenticated) {
         return null;
@@ -410,31 +440,36 @@ export default function BrandsPage() {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-black mb-2">Logo URL</label>
-                        <input
-                            type="url"
-                            value={formLogoUrl}
-                            onChange={(e) => setFormLogoUrl(e.target.value)}
-                            placeholder="https://example.com/logo.png"
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all"
-                            required
-                        />
-                    </div>
-                    {formLogoUrl && (
-                        <div className="p-3 bg-gray-50 rounded-xl">
-                            <p className="text-xs text-gray-500 mb-2">Preview:</p>
-                            <div className="relative h-16 w-full">
-                                <Image
-                                    src={formLogoUrl}
-                                    alt="Preview"
-                                    fill
-                                    className="object-contain"
-                                    unoptimized
-                                    onError={() => { }}
-                                />
+                        <label className="block text-sm font-medium text-black dark:text-white mb-2">Brand Logo</label>
+                        <div className="relative">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => { handleLogoFileChange(e); e.target.value = ''; }}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                            />
+                            <div className="relative flex items-center justify-center flex-col gap-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl py-10 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                {!formLogoUrl ? (
+                                    <p className="text-gray-500 dark:text-gray-400">Click or drag image here to upload</p>
+                                ) : (
+                                    <div className="absolute inset-0">
+                                        <Image
+                                            src={formLogoUrl}
+                                            alt="Logo preview"
+                                            fill
+                                            className="object-contain p-4"
+                                            unoptimized
+                                            onError={() => { }}
+                                        />
+                                    </div>
+                                )}
+                                {uploadingLogo && (
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Uploading: {uploadProgress}%</p>
+                                )}
                             </div>
                         </div>
-                    )}
+                    </div>
+
                     <div className="flex gap-3 pt-2">
                         <button
                             type="button"
@@ -445,7 +480,7 @@ export default function BrandsPage() {
                         </button>
                         <button
                             type="submit"
-                            disabled={submitting}
+                            disabled={submitting || uploadingLogo}
                             className="flex-1 px-4 py-3 bg-black text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50"
                         >
                             {submitting ? 'Saving...' : editingBrand ? 'Update Brand' : 'Add Brand'}
