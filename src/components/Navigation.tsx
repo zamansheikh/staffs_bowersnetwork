@@ -132,12 +132,12 @@ export default function Navigation({ children }: NavigationProps) {
                                     className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group ${
                                         isActive
                                             ? 'bg-black dark:bg-white text-white dark:text-black shadow-sm'
-                                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-black dark:hover:text-white'
+                                            : 'bg-transparent text-black dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white'
                                     }`}
                                 >
-                                    <Icon className="w-5 h-5 flex-shrink-0" />
-                                    <span>{item.label}</span>
-                                    {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
+                                    <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-white dark:text-black' : 'text-black dark:text-white group-hover:text-black dark:group-hover:text-white'}`} />
+                                    <span className={`${isActive ? 'text-white dark:text-black' : 'text-black dark:text-white group-hover:text-black dark:group-hover:text-white'}`}>{item.label}</span>
+                                    {isActive && <ChevronRight className="w-4 h-4 ml-auto text-white dark:text-black" />}
                                 </Link>
                             );
                         })}
