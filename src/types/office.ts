@@ -8,14 +8,35 @@ export interface Email {
     is_me: boolean;
 }
 
-export interface Staff {
-    id: number;
-    user_id?: number;
+export interface User {
+    user_id: number;
+    name: string;
+    first_name?: string;
+    last_name?: string;
+    username: string;
     email: string;
+    roles?: {
+        is_pro: boolean;
+        is_center_admin: boolean;
+        is_tournament_director: boolean;
+    };
+    profile_picture_url?: string;
+    cover_picture_url?: string;
+}
+
+export interface Staff {
+    staff_id: number;
+    user: User;
     designation: string;
+    id?: number; // for backward compatibility
+    user_id?: number;
+    email?: string;
     is_admin?: boolean;
     name?: string;
     username?: string;
+    profile_picture_url?: string;
+    first_name?: string;
+    last_name?: string;
     created_at?: string;
 }
 
