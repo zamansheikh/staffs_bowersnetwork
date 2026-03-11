@@ -54,11 +54,37 @@ export default function BrandsPage() {
                 axios.get('/api/office/brands', { headers: { Authorization: `Bearer ${token}` } }),
                 axios.get('/api/office/brand-types', { headers: { Authorization: `Bearer ${token}` } }),
             ]);
-            // Ensure data is always an array
-            const brandsData = brandsRes.data;
+
+            // normalize types response
             const typesData = typesRes.data;
-            setBrands(Array.isArray(brandsData) ? brandsData : []);
-            setBrandTypes(Array.isArray(typesData) ? typesData : []);
+            const parsedTypes: BrandType[] = Array.isArray(typesData)
+                ? typesData.map((t: any) => ({ id: t.brand_type_id, name: t.name }))
+                : [];
+            setBrandTypes(parsedTypes);
+
+            // normalize brands response (object keyed by type)
+            const rawBrands = brandsRes.data;
+            let flat: Brand[] = [];
+            if (rawBrands && typeof rawBrands === 'object' && !Array.isArray(rawBrands)) {
+                Object.values(rawBrands).forEach((arr: any) => {
+                    if (Array.isArray(arr)) {
+                        flat = flat.concat(
+                            arr.map((b: any) => {
+                                const type = parsedTypes.find((pt) => pt.name === b.brandType);
+                                return {
+                                    id: b.brand_id,
+                                    brand_type_id: type?.id || 0,
+                                    brand_type: type,
+                                    name: b.name,
+                                    formal_name: b.formal_name,
+                                    logo_url: b.logo_url,
+                                } as Brand;
+                            })
+                        );
+                    }
+                });
+            }
+            setBrands(flat);
         } catch (error) {
             console.error('Error fetching brands:', error);
             showToast('Failed to fetch brands', 'error');
