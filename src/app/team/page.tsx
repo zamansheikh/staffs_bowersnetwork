@@ -32,7 +32,9 @@ export default function TeamPage() {
 
     const { toast, showToast, hideToast } = useToast();
 
+    // The add member button should be visible if user is an admin or if we want to allow staff to add
     const isAdmin = user?.roles?.is_office_admin === true;
+    const canAddMember = isAdmin; 
 
     useEffect(() => {
         if (!authLoading && !user?.authenticated) {
@@ -201,15 +203,13 @@ export default function TeamPage() {
                         <p className="text-sm text-gray-600 dark:text-gray-400">Manage your office team members</p>
                     </div>
                 </div>
-                {isAdmin && (
-                    <button
-                        onClick={openAddModal}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-black dark:bg-gray-700 text-white text-sm font-medium rounded-xl hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors"
-                    >
-                        <Plus className="w-4 h-4" />
-                        Add Member
-                    </button>
-                )}
+                <button
+                    onClick={openAddModal}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-black dark:bg-gray-700 text-white text-sm font-medium rounded-xl hover:bg-gray-800 dark:hover:bg-gray-600 transition-colors"
+                >
+                    <Plus className="w-4 h-4" />
+                    Add Member
+                </button>
             </div>
 
             {/* Search */}
@@ -241,7 +241,7 @@ export default function TeamPage() {
                 <EmptyState
                     title={searchQuery ? 'No members found' : 'No team members yet'}
                     description={searchQuery ? 'Try a different search term' : 'Add your first team member to get started'}
-                    action={!searchQuery && isAdmin ? { label: 'Add Member', onClick: openAddModal } : undefined}
+                    action={!searchQuery ? { label: 'Add Member', onClick: openAddModal } : undefined}
                 />
             ) : (
                 <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
