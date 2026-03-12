@@ -16,6 +16,7 @@ export interface User {
     cover_photo_url?: string;
     xp?: number;
     level?: number;
+    designation?: string; // added from staff profile
     authenticated: boolean;
     access_token?: string;
     roles?: {
@@ -57,6 +58,7 @@ interface AuthContextType {
     signin: (username: string, password: string) => Promise<SigninResult>;
     signout: () => void;
     refreshUserFromToken: (token?: string) => Promise<boolean>;
+    updateUser?: (updates: Partial<User>) => void; // optional function to mutate user state
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -104,6 +106,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 });
 
                 const data = profileResponse.data;
+
+                // attempt to pull staff-specific designation as well
+                let staffDesignation: string | undefined;
+                try {
+                    const staffRes = await axios.get('/api/office/staff/self-profile', { headers: { Authorization: `Bearer ${token}` } });
+                    staffDesignation = staffRes.data?.designation;
+                } catch (err) {
+                    // ignore if endpoint not available or fails
+                    console.warn('Could not fetch staff designation', err);
+                }
+
                 const userData: User = {
                     id: data.user_id,
                     user_id: data.user_id,
@@ -116,6 +129,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                     cover_photo_url: data.profile_media?.cover_picture_url,
                     xp: data.xp,
                     level: data.level,
+                    designation: staffDesignation,
                     roles: data.roles,
                     contact_info: data.contact_info,
                     bio: data.bio,
@@ -220,12 +234,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
         router.push('/signin');
     };
 
+    const updateUser = (updates: Partial<User>) => {
+        setUser((prev) => {
+            if (!prev) return prev;
+            const updated = { ...prev, ...updates };
+            try {
+                localStorage.setItem('user', JSON.stringify(updated));
+            } catch {}
+            return updated;
+        });
+    };
+
     const value: AuthContextType = {
         user,
         isLoading,
         signin,
         signout,
         refreshUserFromToken: (token?: string) => hydrateUserFromToken(token, true),
+        updateUser,
     };
 
     return (

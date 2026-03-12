@@ -74,10 +74,13 @@ export default function BrandsPage() {
                     if (Array.isArray(arr)) {
                         flat = flat.concat(
                             arr.map((b: any) => {
-                                const type = parsedTypes.find((pt) => pt.name === b.brandType);
+                                // API returns fields like brand_type, brand_type_id
+                                const type = parsedTypes.find(
+                                    (pt) => pt.id === b.brand_type_id || pt.name === b.brand_type
+                                );
                                 return {
                                     id: b.brand_id,
-                                    brand_type_id: type?.id || 0,
+                                    brand_type_id: b.brand_type_id,
                                     brand_type: type,
                                     name: b.name,
                                     formal_name: b.formal_name,

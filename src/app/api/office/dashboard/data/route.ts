@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const API_BASE = 'https://test.bowlersnetwork.com/api';
 
-// POST - Promote staff to admin
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
     try {
         const token = request.headers.get('authorization')?.replace('Bearer ', '') ||
             request.cookies.get('access_token')?.value;
@@ -12,30 +11,28 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const body = await request.json();
-
-        const response = await fetch(`${API_BASE}/office/staff/make-admin`, {
-            method: 'POST',
+        const response = await fetch(`${API_BASE}/office/dashboard/data`, {
+            method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
-            body: JSON.stringify(body),
         });
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Make admin error:', response.status, errorText);
+            console.error('Dashboard data GET error:', response.status, errorText);
             return NextResponse.json(
-                { error: 'Failed to promote staff to admin' },
+                { error: 'Failed to fetch dashboard data' },
                 { status: response.status }
             );
         }
 
-        return NextResponse.json({ success: true });
+        const data = await response.json();
+        return NextResponse.json(data);
     } catch (error) {
-        console.error('Make admin proxy error:', error);
+        console.error('Dashboard data proxy error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

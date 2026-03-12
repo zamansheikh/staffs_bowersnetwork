@@ -4,9 +4,10 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { PageLoader } from '@/components/LoadingSpinner';
-import { Users, Tag, TrendingUp, ArrowRight, Shield, UserCheck } from 'lucide-react';
+import { Users, Tag, TrendingUp, ArrowRight, Shield, UserCheck, Pencil, X } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
+import Toast, { useToast } from '@/components/Toast';
 
 interface DashboardStats {
     staffCount: number;
@@ -14,13 +15,16 @@ interface DashboardStats {
 }
 
 export default function Dashboard() {
-    const { user, isLoading } = useAuth();
+    const { user, isLoading, updateUser } = useAuth();
     const router = useRouter();
     const [stats, setStats] = useState<DashboardStats>({
         staffCount: 0,
         brandsCount: 0,
     });
     const [loadingStats, setLoadingStats] = useState(true);
+    const [designation, setDesignation] = useState<string | null>(user?.designation ?? null);
+    const [isEditingDesignation, setIsEditingDesignation] = useState(false);
+    const [tempDesignation, setTempDesignation] = useState(user?.designation || '');
 
     const isAdmin = user?.roles?.is_office_admin === true;
 
@@ -33,27 +37,69 @@ export default function Dashboard() {
     useEffect(() => {
         if (user?.authenticated) {
             fetchStats();
+            // pull fresh designation if we don't already have one
+            if (!designation) {
+                fetchDesignation();
+            }
         }
     }, [user]);
+
+    // if the auth context user object updates designation, keep local state in sync
+    useEffect(() => {
+        if (user?.designation && user.designation !== designation) {
+            setDesignation(user.designation);
+        }
+    }, [user?.designation]);
 
     const fetchStats = async () => {
         try {
             const token = localStorage.getItem('access_token');
             const headers = { Authorization: `Bearer ${token}` };
 
-            const [staffRes, brandsRes] = await Promise.allSettled([
-                axios.get('/api/office/staff', { headers }),
-                axios.get('/api/office/brands', { headers }),
-            ]);
-
+            // use consolidated dashboard endpoint that already returns counts
+            const res = await axios.get('/api/office/dashboard/data', { headers });
             setStats({
-                staffCount: staffRes.status === 'fulfilled' ? (staffRes.value.data?.length || 0) : 0,
-                brandsCount: brandsRes.status === 'fulfilled' ? (brandsRes.value.data?.length || 0) : 0,
+                staffCount: res.data?.staff_count || 0,
+                brandsCount: res.data?.brands_count || 0,
             });
         } catch (error) {
             console.error('Error fetching stats:', error);
         } finally {
             setLoadingStats(false);
+        }
+    };
+
+    const fetchDesignation = async () => {
+        try {
+            const token = localStorage.getItem('access_token');
+            const headers = { Authorization: `Bearer ${token}` };
+            const res = await axios.get('/api/office/staff/self-profile', { headers });
+            setDesignation(res.data?.designation || null);
+        } catch (err) {
+            console.error('Error fetching designation:', err);
+        }
+    };
+
+    const { toast, showToast, hideToast } = useToast();
+
+    const saveDesignation = async () => {
+        if (!tempDesignation) {
+            showToast('Designation cannot be empty', 'warning');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('access_token');
+            const headers = { Authorization: `Bearer ${token}` };
+            await axios.post('/api/office/staff/change-designation', { designation: tempDesignation }, { headers });
+            setDesignation(tempDesignation);
+            updateUser && updateUser({ designation: tempDesignation });
+            showToast('Designation updated', 'success');
+        } catch (err) {
+            console.error('Failed to update designation', err);
+            showToast('Failed to update designation', 'error');
+        } finally {
+            setIsEditingDesignation(false);
         }
     };
 
@@ -90,6 +136,7 @@ export default function Dashboard() {
 
     return (
         <div className="p-4 sm:p-6 lg:p-8">
+            <Toast {...toast} onClose={hideToast} />
             {/* Header */}
             <div className="mb-8">
                 <div className="flex items-center gap-3 flex-wrap">
@@ -183,15 +230,34 @@ export default function Dashboard() {
                         <p className="text-sm font-semibold text-black dark:text-white">{user.username || 'N/A'}</p>
                     </div>
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase font-medium mb-1">Role</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase font-medium mb-1">Designation</p>
                         <p className="text-sm font-semibold text-black dark:text-white flex items-center gap-2">
-                            {isAdmin ? (
+                            {isEditingDesignation ? (
                                 <>
-                                    <Shield className="w-4 h-4 text-purple-500" />
-                                    Office Admin
+                                    <input
+                                        type="text"
+                                        className="border border-gray-300 dark:border-gray-600 bg-transparent px-2 py-1 rounded"
+                                        value={tempDesignation}
+                                        onChange={(e) => setTempDesignation(e.target.value)}
+                                    />
+                                    <button onClick={saveDesignation} className="text-green-600 hover:text-green-800">
+                                        Save
+                                    </button>
+                                    <button onClick={() => setIsEditingDesignation(false)} className="text-red-600 hover:text-red-800">
+                                        <X className="w-4 h-4" />
+                                    </button>
                                 </>
                             ) : (
-                                'Office Staff'
+                                <>
+                                    {designation || (isAdmin ? 'Office Admin' : 'Office Staff')}
+                                    <Pencil
+                                        className="w-4 h-4 text-gray-500 hover:text-gray-700 cursor-pointer"
+                                        onClick={() => {
+                                            setTempDesignation(designation || '');
+                                            setIsEditingDesignation(true);
+                                        }}
+                                    />
+                                </>
                             )}
                         </p>
                     </div>

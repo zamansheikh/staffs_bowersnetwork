@@ -52,7 +52,19 @@ export default function TeamPage() {
             const response = await axios.get('/api/office/staff', {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setStaff(response.data || []);
+
+            // normalize response to our Staff type; API returns array of objects
+            const raw: any[] = response.data || [];
+            const normalized: Staff[] = raw.map((item) => ({
+                staff_id: item.staff_id,
+                designation: item.designation,
+                user: item.user || {},
+                // legacy support: some responses may include is_admin flag, otherwise
+                // derive from user roles if office admin property exists
+                is_admin: item.is_admin || item.user?.roles?.is_office_admin || false,
+            }));
+
+            setStaff(normalized);
         } catch (error) {
             console.error('Error fetching staff:', error);
             showToast('Failed to fetch team', 'error');

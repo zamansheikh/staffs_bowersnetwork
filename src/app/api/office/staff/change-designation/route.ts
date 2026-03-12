@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const API_BASE = 'https://test.bowlersnetwork.com/api';
 
-// POST - Promote staff to admin
+// POST - change own designation
 export async function POST(request: NextRequest) {
     try {
         const token = request.headers.get('authorization')?.replace('Bearer ', '') ||
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
 
         const body = await request.json();
 
-        const response = await fetch(`${API_BASE}/office/staff/make-admin`, {
+        const response = await fetch(`${API_BASE}/office/staff/change-designation`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -26,16 +26,19 @@ export async function POST(request: NextRequest) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Make admin error:', response.status, errorText);
+            console.error('Change designation POST error:', response.status, errorText);
             return NextResponse.json(
-                { error: 'Failed to promote staff to admin' },
+                { error: 'Failed to change designation' },
                 { status: response.status }
             );
         }
 
-        return NextResponse.json({ success: true });
+        // Handle empty response body (API returns 200 but no content)
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : { success: true };
+        return NextResponse.json(data);
     } catch (error) {
-        console.error('Make admin proxy error:', error);
+        console.error('Change designation proxy error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

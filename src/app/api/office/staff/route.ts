@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const response = await fetch(`${API_BASE}/office/staff/`, {
+        const response = await fetch(`${API_BASE}/office/staff`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -23,15 +23,36 @@ export async function GET(request: NextRequest) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Staff GET error:', response.status, errorText);
+            console.error(`Staff GET error [${response.status}]:`, errorText);
+            
+            // Return detailed error info for debugging
             return NextResponse.json(
-                { error: 'Failed to fetch staff' },
+                { 
+                    error: `Backend error ${response.status}`,
+                    details: errorText.substring(0, 500),
+                    backend_status: response.status
+                },
                 { status: response.status }
             );
         }
 
         const data = await response.json();
-        return NextResponse.json(data);
+        
+        // Log the actual response for debugging
+        console.log('Backend staff response:', JSON.stringify(data).substring(0, 500));
+        
+        // Handle different response formats
+        // Backend might return data wrapped in 'results', 'data', or as direct array
+        let staffData = data;
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
+            if (Array.isArray(data.results)) {
+                staffData = data.results;
+            } else if (Array.isArray(data.data)) {
+                staffData = data.data;
+            }
+        }
+        
+        return NextResponse.json(staffData || []);
     } catch (error) {
         console.error('Staff GET proxy error:', error);
         return NextResponse.json(
@@ -53,7 +74,7 @@ export async function POST(request: NextRequest) {
 
         const body = await request.json();
 
-        const response = await fetch(`${API_BASE}/office/staff/`, {
+        const response = await fetch(`${API_BASE}/office/staff`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -72,8 +93,21 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const data = await response.json();
-        return NextResponse.json(data);
+        // Handle empty response body (API returns 200 but no content)
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : { success: true };
+        
+        // Handle different response formats - ensure we return consistent data
+        let staffData = data;
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
+            if (Array.isArray(data.results)) {
+                staffData = data.results;
+            } else if (Array.isArray(data.data)) {
+                staffData = data.data;
+            }
+        }
+        
+        return NextResponse.json(staffData || data);
     } catch (error) {
         console.error('Staff POST proxy error:', error);
         return NextResponse.json(
@@ -95,7 +129,7 @@ export async function DELETE(request: NextRequest) {
 
         const body = await request.json();
 
-        const response = await fetch(`${API_BASE}/office/staff/`, {
+        const response = await fetch(`${API_BASE}/office/staff`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`,

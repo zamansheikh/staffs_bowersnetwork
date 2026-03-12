@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const response = await fetch(`${API_BASE}/office/brand-types/`, {
+        const response = await fetch(`${API_BASE}/office/brand-types`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,

@@ -18,7 +18,7 @@ export async function POST(
 
         const body = await request.json();
 
-        const response = await fetch(`${API_BASE}/office/brands/${id}/edit/`, {
+        const response = await fetch(`${API_BASE}/office/brands/${id}/edit`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -37,7 +37,9 @@ export async function POST(
             );
         }
 
-        const data = await response.json();
+        // Handle empty response body (API returns 200 but no content)
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : { success: true };
         return NextResponse.json(data);
     } catch (error) {
         console.error('Brand edit proxy error:', error);
