@@ -92,6 +92,26 @@ export default function BrandDetailPage({ params }: { params: Promise<{ id: stri
         setShowModal(false);
     };
 
+    const handleDelete = async () => {
+        if (!brand) return;
+        const confirmed = confirm('Are you sure you want to delete this brand? This action cannot be undone.');
+        if (!confirmed) return;
+        setSubmitting(true);
+        try {
+            const token = localStorage.getItem('access_token');
+            await axios.delete(`/api/office/brands/${id}/delete`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            showToast('Brand deleted', 'success');
+            router.push('/brands');
+        } catch (err) {
+            console.error('Error deleting brand', err);
+            showToast('Failed to delete brand', 'error');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     // helper to update preview when user selects a file
     const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -166,14 +186,23 @@ export default function BrandDetailPage({ params }: { params: Promise<{ id: stri
                     <h1 className="text-2xl font-bold text-black">{brand.name}</h1>
                     <p className="text-sm text-gray-600">{brand.formal_name}</p>
                 </div>
-                <button
-                    onClick={startEditing}
-                    disabled={showModal}
-                    className="ml-auto inline-flex items-center gap-2 px-4 py-2.5 bg-black text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50"
-                >
-                    <Edit2 className="w-4 h-4" />
-                    Edit
-                </button>
+                <div className="ml-auto flex items-center gap-2">
+                    <button
+                        onClick={startEditing}
+                        disabled={showModal}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-black text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50"
+                    >
+                        <Edit2 className="w-4 h-4" />
+                        Edit
+                    </button>
+                    <button
+                        onClick={handleDelete}
+                        disabled={submitting}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 text-sm font-medium rounded-xl hover:bg-red-100 transition-colors disabled:opacity-50"
+                    >
+                        Delete
+                    </button>
+                </div>
             </div>
 
             <div className="space-y-4 text-center flex flex-col items-center">
