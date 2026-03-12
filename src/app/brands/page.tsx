@@ -56,7 +56,7 @@ export default function BrandsPage() {
             const token = localStorage.getItem('access_token');
             const [brandsRes, typesRes] = await Promise.all([
                 axios.get('/api/office/brands', { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get('/api/office/brand-types', { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get('/api/office/brands/types', { headers: { Authorization: `Bearer ${token}` } }),
             ]);
 
             // normalize types response
