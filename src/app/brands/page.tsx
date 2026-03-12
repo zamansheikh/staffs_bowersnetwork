@@ -8,6 +8,7 @@ import EmptyState from '@/components/EmptyState';
 import Modal from '@/components/Modal';
 import Toast, { useToast } from '@/components/Toast';
 import { Tag, Plus, Edit2, Search, X, ExternalLink, Layers } from 'lucide-react';
+import Link from 'next/link';
 import axios from 'axios';
 import Image from 'next/image';
 import { Brand, BrandType } from '@/types/office';
@@ -27,6 +28,10 @@ export default function BrandsPage() {
     const [showModal, setShowModal] = useState(false);
     const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    // brand type addition
+    const [showAddTypeModal, setShowAddTypeModal] = useState(false);
+    const [newTypeName, setNewTypeName] = useState('');
+    const [typeSubmitting, setTypeSubmitting] = useState(false);
 
     // Form state
     const [formName, setFormName] = useState('');
@@ -97,6 +102,28 @@ export default function BrandsPage() {
             showToast('Failed to fetch brands', 'error');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleAddBrandType = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newTypeName) {
+            showToast('Please enter a type name', 'warning');
+            return;
+        }
+        setTypeSubmitting(true);
+        try {
+            const token = localStorage.getItem('access_token');
+            await axios.post('/api/office/brands/types', { name: newTypeName }, { headers: { Authorization: `Bearer ${token}` } });
+            showToast('Brand type added', 'success');
+            setShowAddTypeModal(false);
+            setNewTypeName('');
+            fetchData();
+        } catch (err) {
+            console.error('Error adding brand type:', err);
+            showToast('Failed to add brand type', 'error');
+        } finally {
+            setTypeSubmitting(false);
         }
     };
 
@@ -303,9 +330,10 @@ export default function BrandsPage() {
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             {filteredBrands.map((brand, index) => (
-                                <div
+                                <Link
                                     key={brand.id || brand.name || index}
-                                    className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-lg hover:border-gray-300 transition-all group"
+                                    href={`/brands/${brand.id}`}
+                                    className="block cursor-pointer bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-lg hover:border-gray-300 transition-all group"
                                 >
                                     <div className="relative w-full h-24 mb-4 bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center">
                                         {brand.logo_url ? (
@@ -330,26 +358,32 @@ export default function BrandsPage() {
                                         </span>
                                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
-                                                onClick={() => openEditModal(brand)}
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    openEditModal(brand);
+                                                }}
                                                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                                                 title="Edit Brand"
                                             >
                                                 <Edit2 className="w-4 h-4 text-gray-600" />
                                             </button>
                                             {brand.logo_url && (
-                                                <a
-                                                    href={brand.logo_url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        window.open(brand.logo_url, '_blank', 'noopener');
+                                                    }}
                                                     className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                                                     title="View Logo"
                                                 >
                                                     <ExternalLink className="w-4 h-4 text-gray-600" />
-                                                </a>
+                                                </button>
                                             )}
                                         </div>
                                     </div>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     )}
@@ -359,6 +393,15 @@ export default function BrandsPage() {
             {/* Brand Types Tab */}
             {activeTab === 'types' && (
                 <>
+                    <div className="flex justify-end mb-4">
+                        <button
+                            onClick={() => setShowAddTypeModal(true)}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 bg-black text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors"
+                        >
+                            <Tag className="w-4 h-4" />
+                            Add Type
+                        </button>
+                    </div>
                     {loading ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             {Array.from({ length: 4 }).map((_, i) => (
@@ -399,7 +442,7 @@ export default function BrandsPage() {
                 </>
             )}
 
-            {/* Add/Edit Modal */}
+            {/* Add/Edit Brand Modal */}
             <Modal
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}
@@ -487,6 +530,42 @@ export default function BrandsPage() {
                             className="flex-1 px-4 py-3 bg-black text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50"
                         >
                             {submitting ? 'Saving...' : editingBrand ? 'Update Brand' : 'Add Brand'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
+
+            {/* Add Brand Type Modal */}
+            <Modal
+                isOpen={showAddTypeModal}
+                onClose={() => setShowAddTypeModal(false)}
+                title="Add Brand Type"
+            >
+                <form onSubmit={handleAddBrandType} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Name</label>
+                        <input
+                            type="text"
+                            value={newTypeName}
+                            onChange={(e) => setNewTypeName(e.target.value)}
+                            className="mt-1 block w-full border border-gray-300 rounded-xl p-2"
+                            placeholder="e.g. Balls"
+                        />
+                    </div>
+                    <div className="flex justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setShowAddTypeModal(false)}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={typeSubmitting}
+                            className="px-4 py-2 text-sm font-medium text-white bg-black rounded-xl hover:bg-gray-800 disabled:opacity-50"
+                        >
+                            {typeSubmitting ? 'Adding…' : 'Add'}
                         </button>
                     </div>
                 </form>
