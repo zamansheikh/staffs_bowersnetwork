@@ -130,6 +130,9 @@ export default function BrandDetailPage({ params }: { params: Promise<{ id: stri
         setSubmitting(true);
         try {
             const token = localStorage.getItem('access_token');
+            let finalLogoUrl = formLogoUrl;
+
+            // if there is a file selected, upload first
             if (logoFile) {
                 setUploadingLogo(true);
                 setUploadProgress(0);
@@ -139,26 +142,38 @@ export default function BrandDetailPage({ params }: { params: Promise<{ id: stri
                 });
                 setUploadingLogo(false);
                 if (result.success && result.publicUrl) {
+                    finalLogoUrl = result.publicUrl;
                     setFormLogoUrl(result.publicUrl);
                 } else {
                     throw new Error('Logo upload failed');
                 }
             }
 
-            const payload = {
+            const editPayload = {
                 brand_type_id: formBrandTypeId,
                 brand_data: {
                     name: formName,
                     formal_name: formFormalName,
-                    logo_url: formLogoUrl,
                 },
             };
 
-            await axios.post(`/api/office/brands/${id}/edit`, payload, {
+            // Update basic info
+            await axios.post(`/api/office/brands/${id}/edit`, editPayload, {
                 headers: { Authorization: `Bearer ${token}` },
             });
+
+            // Update logo if a new one was uploaded
+            if (logoFile && finalLogoUrl) {
+                await axios.post(`/api/office/brands/${id}/change-logo`, {
+                    logo_url: finalLogoUrl
+                }, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            }
+
             showToast('Brand updated', 'success');
             setShowModal(false);
+            setLogoFile(null);
             fetchBrand();
         } catch (err) {
             console.error('Error saving brand', err);

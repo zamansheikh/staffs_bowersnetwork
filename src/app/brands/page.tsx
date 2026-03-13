@@ -132,6 +132,7 @@ export default function BrandsPage() {
         setFormName('');
         setFormFormalName('');
         setFormLogoUrl('');
+        setLogoFile(null);
         setFormBrandTypeId(brandTypes[0]?.id || '');
         setShowModal(true);
     };
@@ -141,6 +142,7 @@ export default function BrandsPage() {
         setFormName(brand.name);
         setFormFormalName(brand.formal_name);
         setFormLogoUrl(brand.logo_url);
+        setLogoFile(null);
         setFormBrandTypeId(brand.brand_type_id);
         setShowModal(true);
     };
@@ -155,6 +157,8 @@ export default function BrandsPage() {
         setSubmitting(true);
         try {
             const token = localStorage.getItem('access_token');
+            let finalLogoUrl = formLogoUrl;
+
             // if there is a file selected, upload first
             if (logoFile) {
                 setUploadingLogo(true);
@@ -165,33 +169,52 @@ export default function BrandsPage() {
                 });
                 setUploadingLogo(false);
                 if (result.success && result.publicUrl) {
+                    finalLogoUrl = result.publicUrl;
                     setFormLogoUrl(result.publicUrl);
                 } else {
                     throw new Error('Logo upload failed');
                 }
             }
 
-            const payload = {
-                brand_type_id: formBrandTypeId,
-                brand_data: {
-                    name: formName,
-                    formal_name: formFormalName,
-                    logo_url: formLogoUrl,
-                },
-            };
-
             if (editingBrand) {
-                await axios.post(`/api/office/brands/${editingBrand.id}/edit`, payload, {
+                const editPayload = {
+                    brand_type_id: formBrandTypeId,
+                    brand_data: {
+                        name: formName,
+                        formal_name: formFormalName,
+                    },
+                };
+
+                // Update basic info
+                await axios.post(`/api/office/brands/${editingBrand.id}/edit`, editPayload, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
+
+                // Update logo if a new one was uploaded
+                if (logoFile && finalLogoUrl) {
+                    await axios.post(`/api/office/brands/${editingBrand.id}/change-logo`, {
+                        logo_url: finalLogoUrl
+                    }, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                }
                 showToast('Brand updated successfully', 'success');
             } else {
-                await axios.post('/api/office/brands', payload, {
+                const createPayload = {
+                    brand_type_id: formBrandTypeId,
+                    brand_data: {
+                        name: formName,
+                        formal_name: formFormalName,
+                        logo_url: finalLogoUrl,
+                    },
+                };
+                await axios.post('/api/office/brands', createPayload, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 showToast('Brand created successfully', 'success');
             }
             setShowModal(false);
+            setLogoFile(null);
             fetchData();
         } catch (error) {
             console.error('Error saving brand:', error);

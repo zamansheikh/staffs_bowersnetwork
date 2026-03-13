@@ -2,20 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
     images: {
+        // Allow remote images from any hostname (use carefully in production)
         remotePatterns: [
             {
                 protocol: 'https',
-                hostname: 'logos.bowlersnetwork.com',
-                pathname: '/**',
-            },
-            {
-                protocol: 'https',
-                hostname: 'test.bowlersnetwork.com',
-                pathname: '/**',
-            },
-            {
-                protocol: 'https',
-                hostname: 'cdn.bowlersnetwork.com',
+                hostname: '**',
                 pathname: '/**',
             },
         ],
