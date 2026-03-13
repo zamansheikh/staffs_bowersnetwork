@@ -259,14 +259,9 @@ export default function TeamPage() {
                                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                                         Designation
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                                        Role
+                                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                        Actions
                                     </th>
-                                    {isAdmin && (
-                                        <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                                            Actions
-                                        </th>
-                                    )}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -311,40 +306,17 @@ export default function TeamPage() {
                                                 {member.designation || 'N/A'}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            {member.is_admin ? (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full">
-                                                    <Shield className="w-3 h-3" />
-                                                    Admin
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full">
-                                                    Staff
-                                                </span>
-                                            )}
+                                        <td className="px-6 py-4 text-right">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <button
+                                                    onClick={() => setShowDeleteConfirm(member)}
+                                                    className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                                    title="Remove Member"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
                                         </td>
-                                        {isAdmin && (
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    {!member.is_admin && (
-                                                        <button
-                                                            onClick={() => setShowPromoteConfirm(member)}
-                                                            className="p-2 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
-                                                            title="Promote to Admin"
-                                                        >
-                                                            <Shield className="w-4 h-4" />
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        onClick={() => setShowDeleteConfirm(member)}
-                                                        className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                                                        title="Remove Member"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        )}
                                     </tr>
                                 ))}
                             </tbody>
@@ -380,35 +352,18 @@ export default function TeamPage() {
                                                     <Briefcase className="w-3 h-3" />
                                                     {member.designation || 'N/A'}
                                                 </span>
-                                                {member.is_admin && (
-                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full">
-                                                        <Shield className="w-3 h-3" />
-                                                        Admin
-                                                    </span>
-                                                )}
                                             </div>
                                         </div>
                                     </div>
-                                    {isAdmin && (
-                                        <div className="flex items-center gap-1 flex-shrink-0">
-                                            {!member.is_admin && (
-                                                <button
-                                                    onClick={() => setShowPromoteConfirm(member)}
-                                                    className="p-2 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
-                                                    title="Promote to Admin"
-                                                >
-                                                    <Shield className="w-4 h-4" />
-                                                </button>
-                                            )}
-                                            <button
-                                                onClick={() => setShowDeleteConfirm(member)}
-                                                className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                                                title="Remove Member"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    )}
+                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                        <button
+                                            onClick={() => setShowDeleteConfirm(member)}
+                                            className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                            title="Remove Member"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
