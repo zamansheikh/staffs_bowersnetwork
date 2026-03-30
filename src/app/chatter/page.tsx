@@ -281,7 +281,7 @@ export default function ChatterPage() {
                                                 )}
                                                 <div>
                                                     <p className="text-sm font-semibold text-black dark:text-white">{topic.name}</p>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400">ID: {topic.topic_id}</p>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">Details: {topic.description}</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -423,11 +423,13 @@ export default function ChatterPage() {
                     {formBannerUrl && (
                         <div>
                             <label className="block text-sm font-medium text-black mb-2">Banner Preview</label>
-                            <img
-                                src={formBannerUrl}
-                                alt="Banner preview"
-                                className="w-full h-40 object-cover rounded-xl border border-gray-200"
-                            />
+                            <div className="relative w-full aspect-video rounded-xl border border-gray-200 overflow-hidden bg-gray-50 dark:bg-gray-800">
+                                <img
+                                    src={formBannerUrl}
+                                    alt="Banner preview"
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
                         </div>
                     )}
 
