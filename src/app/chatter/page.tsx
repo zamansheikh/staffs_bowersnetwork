@@ -9,7 +9,7 @@ import Modal from '@/components/Modal';
 import Toast, { useToast } from '@/components/Toast';
 import { uploadFileToCloud } from '@/lib/cloudUploadService';
 import { ChatterTopic } from '@/types/office';
-import { MessageSquare, Plus, Edit2, Search, X, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { MessageSquare, Plus, Edit2, Search, X, Image as ImageIcon, Loader2, Trash2 } from 'lucide-react';
 import axios from 'axios';
 
 export default function ChatterPage() {
@@ -24,6 +24,7 @@ export default function ChatterPage() {
 
     const [showModal, setShowModal] = useState(false);
     const [editingTopic, setEditingTopic] = useState<ChatterTopic | null>(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState<ChatterTopic | null>(null);
 
     const [formName, setFormName] = useState('');
     const [formDescription, setFormDescription] = useState('');
@@ -185,6 +186,26 @@ export default function ChatterPage() {
         }
     };
 
+    const handleDelete = async (topicId: number) => {
+        setSubmitting(true);
+        try {
+            const token = localStorage.getItem('access_token');
+            await axios.delete('/api/office/chatter/topics', {
+                data: { topic_id: topicId },
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            showToast('Topic deleted successfully', 'success');
+            setShowDeleteConfirm(null);
+            fetchTopics();
+        } catch (error) {
+            console.error('Error deleting topic:', error);
+            showToast('Failed to delete topic', 'error');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     const filteredTopics = useMemo(
         () => topics.filter((topic) => (
             topic.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -297,13 +318,22 @@ export default function ChatterPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <button
-                                                onClick={() => openEditModal(topic)}
-                                                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                                            >
-                                                <Edit2 className="w-4 h-4" />
-                                                Edit
-                                            </button>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <button
+                                                    onClick={() => openEditModal(topic)}
+                                                    className="p-2 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                                                    title="Edit Topic"
+                                                >
+                                                    <Edit2 className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => setShowDeleteConfirm(topic)}
+                                                    className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                                    title="Delete Topic"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -340,13 +370,20 @@ export default function ChatterPage() {
                                     </span>
                                 </div>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">{topic.description}</p>
-                                <div>
+                                <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => openEditModal(topic)}
                                         className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                                     >
                                         <Edit2 className="w-4 h-4" />
                                         Edit
+                                    </button>
+                                    <button
+                                        onClick={() => setShowDeleteConfirm(topic)}
+                                        className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                        Delete
                                     </button>
                                 </div>
                             </div>
@@ -451,6 +488,36 @@ export default function ChatterPage() {
                         </button>
                     </div>
                 </form>
+            </Modal>
+
+            {/* Delete Confirmation Modal */}
+            <Modal
+                isOpen={!!showDeleteConfirm}
+                onClose={() => setShowDeleteConfirm(null)}
+                title="Delete Topic"
+            >
+                <div className="space-y-4">
+                    <p className="text-gray-600">
+                        Are you sure you want to delete <span className="font-semibold text-black">{showDeleteConfirm?.name}</span>? 
+                        This action cannot be undone.
+                    </p>
+                    <div className="flex items-center justify-end gap-3 pt-2">
+                        <button
+                            onClick={() => setShowDeleteConfirm(null)}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={() => showDeleteConfirm && handleDelete(showDeleteConfirm.topic_id)}
+                            disabled={submitting}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50"
+                        >
+                            {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                            Delete
+                        </button>
+                    </div>
+                </div>
             </Modal>
 
             <Toast {...toast} onClose={hideToast} />

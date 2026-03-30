@@ -128,3 +128,43 @@ export async function PATCH(request: NextRequest) {
         );
     }
 }
+
+export async function DELETE(request: NextRequest) {
+    try {
+        const token = getToken(request);
+
+        if (!token) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const body = await request.json();
+
+        const response = await fetch(`${API_BASE}/office/chatter/topics`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify(body),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Chatter topics DELETE error:', response.status, errorText);
+            return NextResponse.json(
+                { error: 'Failed to delete topic' },
+                { status: response.status }
+            );
+        }
+
+        const data = await parseResponseBody(response);
+        return NextResponse.json(data);
+    } catch (error) {
+        console.error('Chatter topics DELETE proxy error:', error);
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        );
+    }
+}
