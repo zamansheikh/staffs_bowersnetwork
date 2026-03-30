@@ -16,6 +16,7 @@ import {
     ChevronRight,
     Shield,
     UserCheck,
+    MessageSquare,
     Sun,
     Moon,
 } from 'lucide-react';
@@ -30,6 +31,7 @@ const navItems = [
     { href: '/users', label: 'Users', icon: UserCheck },
     { href: '/team', label: 'Team', icon: Users },
     { href: '/brands', label: 'Brands', icon: Tag },
+    { href: '/chatter', label: 'Chatter', icon: MessageSquare },
 ];
 
 export default function Navigation({ children }: NavigationProps) {

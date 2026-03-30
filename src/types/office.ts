@@ -87,3 +87,26 @@ export interface EditBrandRequest {
         logo_url: string;
     };
 }
+
+export interface ChatterTopic {
+    topic_id: number;
+    name: string;
+    description: string;
+    banner_url: string;
+    is_hidden: boolean;
+}
+
+export interface CreateChatterTopicRequest {
+    name: string;
+    description: string;
+    banner_url: string;
+}
+
+export interface UpdateChatterTopicRequest {
+    topic_id: number;
+    data: {
+        name?: string;
+        description?: string;
+        banner_url?: string;
+    };
+}
